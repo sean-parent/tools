@@ -78,7 +78,13 @@ tell application "Xcode"
 	
 	set _path to path of _document
 	
-	set _result to do shell script "/usr/local/bin/clang-format -lines=" & item 1 of _range & ":" & item 2 of _range & " " & quoted form of _path & "> /tmp/xcode-clang-format.tmp"
+	try
+		do shell script "/usr/local/bin/clang-format -lines=" & item 1 of _range & ":" & item 2 of _range & " " & quoted form of _path & "> /tmp/xcode-clang-format.tmp"
+	on error error_message
+		display alert "clang-format failed" message error_message buttons {"OK"} default button "OK"
+		return
+	end try
+	
 	set _result to read POSIX file "/tmp/xcode-clang-format.tmp"
 	
 	set _final_lines to length of paragraphs in _result
