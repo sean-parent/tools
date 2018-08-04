@@ -48,9 +48,14 @@ on last_blank_line_before(_lines, _index)
 	return 1
 end last_blank_line_before
 
+
 on front_source_document()
+	set _edited_suffix to " Ñ Edited"
 	tell application "Xcode"
 		set _name to name of front window
+		if _name ends with _edited_suffix then
+			set _name to (characters 1 thru ((the length of _name) - (length of _edited_suffix)) of _name as string)
+		end if
 		repeat with _document in (source documents whose name is _name)
 			if selected paragraph range of _document is not {} then return _document
 		end repeat
