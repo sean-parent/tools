@@ -23,7 +23,26 @@ Then add the script as a behavior in Xcode:
 Now you can select text in a source document in XCode and hit F1 (or whatever you chose) to format
 that selection. You should make sure the code will compile first or your formatting may be wrong.
 If you don't like the formatting, you can undo.
+
+This script relies on sending key commands to the app - you must modify the script if your
+key commands have been remapped.
 *)
+
+on paste(_text)
+	set the clipboard to _text
+	
+	tell application "System Events"
+		set frontmost of process "Xcode" to true
+		keystroke "v" using command down
+	end tell
+end paste
+
+on save_document()
+	tell application "System Events"
+		set frontmost of process "Xcode" to true
+		keystroke "s" using command down
+	end tell
+end save_document
 
 on is_blank_line(_line)
 	repeat with _char in _line
@@ -57,7 +76,10 @@ on front_source_document()
 			set _name to (characters 1 thru ((the length of _name) - (length of _edited_suffix)) of _name as string)
 		end if
 		repeat with _document in (source documents whose name is _name)
-			if selected paragraph range of _document is not {} then return _document
+			if selected paragraph range of _document is not {} then
+				my save_document()
+				return _document
+			end if
 		end repeat
 		return null
 	end tell
@@ -103,12 +125,7 @@ tell application "Xcode"
 	end repeat
 	set _replace to _replace & paragraph _l of _result
 	
-	set the clipboard to _replace as text
-	
-	tell application "System Events"
-		set frontmost of process "Xcode" to true
-		keystroke "v" using command down
-	end tell
+	my paste(_replace as text)
 	
 	set _l to (item 2 of (get selected paragraph range of _document))
 	
