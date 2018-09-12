@@ -26,7 +26,7 @@ cd <where-you-want-it>
 git clone https://github.com/sean-parent/tools.git tools
 ```
 
-Make the scripte executable:
+Make the script executable:
 
 ```
 chmod +x ./tools/xcode-clang-format.applescript
@@ -38,6 +38,10 @@ Add it as a behavior to Xcode:
 ![xcode-add-behavior](docs/images/xcode-add-behavior.gif)
 
 You can add a command-key shortcut directly in Xcode or there is more flexibility if you add a shortcut through the keyboard system preferences (for example, I use f1 as my shortcut key).
+
+Turn off _Syntax-aware indenting:_ in Xcode preferences
+
+![xcode-disable-indenting](docs/images/xcode-disable-indenting.png)
 
 **Note: The script has two hard coded keystrokes in it. One to save the document prior to formatting, and one to paste the formatted changes back into the document. If your command keys are mapped to something other than the US English defaults for these commands, you must modify the script. Find and edit these line:**
 
