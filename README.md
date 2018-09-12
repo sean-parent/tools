@@ -39,7 +39,7 @@ Add it as a behavior to Xcode:
 
 You can add a command-key shortcut directly in Xcode or there is more flexibility if you add a shortcut through the keyboard system preferences (for example, I use f1 as my shortcut key).
 
-Turn off _Syntax-aware indenting:_ in Xcode preferences
+Turn off _Syntax-aware indenting:_ in Xcode preferences:
 
 ![xcode-disable-indenting](docs/images/xcode-disable-indenting.png)
 
