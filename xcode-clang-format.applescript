@@ -30,7 +30,7 @@ key commands have been remapped.
 
 on paste(_text)
 	set the clipboard to _text
-
+	
 	tell application "System Events"
 		set frontmost of process "Xcode" to true
 		keystroke "v" using command down
@@ -74,7 +74,7 @@ on front_source_document()
 		set _name to name of front window
 		if _name ends with _edited_suffix then
 			set _name to (characters 1 thru Â
-			    ((the length of _name) - (length of _edited_suffix)) of _name as string)
+				((the length of _name) - (length of _edited_suffix)) of _name as string)
 		end if
 		repeat with _document in (documents whose name is _name)
 			if selected paragraph range of _document is not {} then
@@ -87,55 +87,55 @@ on front_source_document()
 end front_source_document
 
 tell application "Xcode"
-
+	
 	set _document to my front_source_document()
-
+	
 	if _document is null then
 		display alert "clang-format failed." message Â
-		    "Could not find front document." buttons {"OK"} default button "OK"
+			"Could not find front document." buttons {"OK"} default button "OK"
 		return
 	end if
-
+	
 	set _source to paragraphs of (get text of _document)
 	set _lines to length of _source
-
+	
 	set _range to selected paragraph range of _document
 	set item 1 of _range to my last_blank_line_before(_source, item 1 of _range)
 	set item 2 of _range to my last_blank_line_after(_source, item 2 of _range)
-
+	
 	set selected paragraph range of _document to _range
-
+	
 	set _path to path of _document
-
+	
 	try
 		do shell script "/usr/local/bin/clang-format -lines=" & item 1 Â
-		    of _range & ":" & item 2 Â
-		    of _range & " " & quoted form of _path & "> /tmp/xcode-clang-format.tmp"
+			of _range & ":" & item 2 Â
+			of _range & " " & quoted form of _path & "> /tmp/xcode-clang-format.tmp"
 	on error error_message
 		display alert "clang-format failed" message error_message buttons {"OK"} default button "OK"
 		return
 	end try
-
+	
 	set _result to read POSIX file "/tmp/xcode-clang-format.tmp" as Çclass utf8È
-
+	
 	set _final_lines to length of paragraphs in _result
-
+	
 	set _f to item 1 of _range
 	set _l to (item 2 of _range) + (_final_lines - _lines)
-
+	
 	set _replace to ""
 	repeat with _line in paragraphs _f thru (_l - 1) of _result
 		set _replace to _replace & _line & linefeed
 	end repeat
 	set _replace to _replace & paragraph _l of _result
-
+	
 	my paste(_replace as text)
-
+	
 	set _l to (item 2 of (get selected paragraph range of _document))
-
+	
 	if _l is not _f then
 		set _l to _l - 1
 	end if
-
+	
 	set selected paragraph range of _document to {_f, _l}
 end tell
