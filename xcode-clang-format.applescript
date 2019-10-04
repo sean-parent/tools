@@ -73,7 +73,8 @@ on front_source_document()
 	tell application "Xcode"
 		set _name to name of front window
 		if _name ends with _edited_suffix then
-			set _name to (characters 1 thru ((the length of _name) - (length of _edited_suffix)) of _name as string)
+			set _name to (characters 1 thru Â
+				((the length of _name) - (length of _edited_suffix)) of _name as string)
 		end if
 		repeat with _document in (documents whose name is _name)
 			if selected paragraph range of _document is not {} then
@@ -90,7 +91,8 @@ tell application "Xcode"
 	set _document to my front_source_document()
 	
 	if _document is null then
-		display alert "clang-format failed." message "Could not find front document." buttons {"OK"} default button "OK"
+		display alert "clang-format failed." message Â
+			"Could not find front document." buttons {"OK"} default button "OK"
 		return
 	end if
 	
@@ -112,7 +114,7 @@ tell application "Xcode"
 		return
 	end try
 	
-	set _result to read POSIX file "/tmp/xcode-clang-format.tmp"
+	set _result to read POSIX file "/tmp/xcode-clang-format.tmp" as Çclass utf8È
 	
 	set _final_lines to length of paragraphs in _result
 	
