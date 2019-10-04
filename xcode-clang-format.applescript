@@ -75,7 +75,7 @@ on front_source_document()
 		if _name ends with _edited_suffix then
 			set _name to (characters 1 thru ((the length of _name) - (length of _edited_suffix)) of _name as string)
 		end if
-		repeat with _document in (source documents whose name is _name)
+		repeat with _document in (documents whose name is _name)
 			if selected paragraph range of _document is not {} then
 				my save_document()
 				return _document
@@ -106,7 +106,7 @@ tell application "Xcode"
 	set _path to path of _document
 	
 	try
-		do shell script "/usr/local/bin/clang-format -lines=" & item 1 of _range & ":" & item 2 of _range & " " & quoted form of _path & "> /tmp/xcode-clang-format.tmp"
+		do shell script "source ~/.bash_profile;/usr/local/bin/clang-format -lines=" & item 1 of _range & ":" & item 2 of _range & " " & quoted form of _path & "> /tmp/xcode-clang-format.tmp"
 	on error error_message
 		display alert "clang-format failed" message error_message buttons {"OK"} default button "OK"
 		return
