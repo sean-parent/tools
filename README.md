@@ -55,7 +55,8 @@ Turn off _Syntax-aware indenting:_ in Xcode preferences:
 ## Usage
 
 * The script uses the `-style=file` option for `clang-format`. It will find a `.clang-format` or `_clang-format` file in the same directy or any parent directory of the file you are formatting. Make sure you have an appropriate format file in place.
-* Make sure you only have one tab, and one pane, open on the document you wish to format
+* **You can only have one instance of Xcode running**
+* **Make sure you only have one tab, and one pane, open on the document you wish to format**
 * Select an area of text you wish to format
 * Select the `clang-format` behavior
 
