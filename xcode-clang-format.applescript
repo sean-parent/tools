@@ -108,7 +108,10 @@ tell application "Xcode"
 	set _path to path of _document
 	
 	try
-		do shell script "source ~/.bash_profile;/usr/local/bin/clang-format -lines=" & item 1 of _range & ":" & item 2 of _range & " " & quoted form of _path & "> /tmp/xcode-clang-format.tmp"
+		do shell script "eval \"$(/opt/homebrew/bin/brew shellenv)\";" & Â
+		"clang-format " & Â
+			"-lines=" & item 1 of _range & ":" & item 2 of _range & " " & Â
+			quoted form of _path & " > /tmp/xcode-clang-format.tmp"
 	on error error_message
 		display alert "clang-format failed" message error_message buttons {"OK"} default button "OK"
 		return
