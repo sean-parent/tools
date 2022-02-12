@@ -71,7 +71,7 @@ on last_blank_line_before(_lines, _index)
 	return 1
 end last_blank_line_before
 
-on line_count_without_trailing_empyty_lines(_source)
+on line_count_without_trailing_empty_lines(_source)
 	set _lines to (length of _source)
 	if _lines = 0 then return 0
 	
@@ -82,7 +82,7 @@ on line_count_without_trailing_empyty_lines(_source)
 	end repeat
 	
 	return 1
-end line_count_without_trailing_empyty_lines
+end line_count_without_trailing_empty_lines
 
 on front_source_document()
 	tell application "Xcode"
@@ -116,12 +116,16 @@ tell application "Xcode"
 	
 	set _source to paragraphs of (get text of _document)
 	
-	
 	set _range to selected paragraph range of _document
-	get _range
+	
 	set item 1 of _range to my last_blank_line_before(_source, item 1 of _range)
 	set item 2 of _range to my last_blank_line_after(_source, item 2 of _range)
 	
+	-- pin range to ignore empty blank lines
+	
+	set _source_lines to my line_count_without_trailing_empty_lines(_source)
+	if item 1 of _range > _source_lines then return -- selection in trailing white space is ambigous
+	if item 2 of _range > _source_lines then set item 2 of _range to _source_lines
 	
 	set selected paragraph range of _document to _range
 	
@@ -139,8 +143,7 @@ tell application "Xcode"
 	
 	set _result to paragraphs in (read POSIX file "/tmp/xcode-clang-format.tmp" as Çclass utf8È)
 	
-	set _source_lines to length of _source
-	set _result_lines to length of _result
+	set _result_lines to my line_count_without_trailing_empty_lines(_result)
 	
 	set _f to item 1 of _range
 	set _l to (item 2 of _range) + (_result_lines - _source_lines)
