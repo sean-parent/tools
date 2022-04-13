@@ -43,13 +43,17 @@ Turn off _Syntax-aware indenting:_ in Xcode preferences:
 
 ![xcode-disable-indenting](docs/images/xcode-disable-indenting.png)
 
+In System Preferences, allow Xcode to send keystrokes
+
+![image](https://user-images.githubusercontent.com/2279724/163095603-a7ec7398-458f-4f0e-80da-ebcb66f15a7c.png)
+
 **Note: The script has two hard coded keystrokes in it. One to save the document prior to formatting, and one to paste the formatted changes back into the document. If your command keys are mapped to something other than the US English defaults for these commands, you must modify the script. Find and edit these line:**
 
 ```
-		keystroke "v" using command down
+	my xcode_command("v") -- paste
 ```
 ```
-		keystroke "s" using command down
+	my xcode_command("s") -- save
 ```
 
 ## Usage
