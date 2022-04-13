@@ -28,22 +28,27 @@ This script relies on sending key commands to the app - you must modify the scri
 key commands have been remapped.
 *)
 
+on xcode_command(key)
+	tell application "System Events"
+		set frontmost of process "Xcode" to true
+		try
+			keystroke key using command down
+		on error message
+			display dialog message
+			error
+		end try
+	end tell
+	delay 0.5 -- delay so system events don't cross Xcode events
+end xcode_keystroke
+
 on paste(_text)
 	-- delay 0.5 -- delay so system events don't cross Xcode events
 	set the clipboard to _text
-	
-	tell application "System Events"
-		set frontmost of process "Xcode" to true
-		keystroke "v" using command down
-	end tell
-	delay 0.5 -- delay so system events don't cross Xcode events
+	my xcode_command("v") -- paste
 end paste
 
 on save_document()
-	tell application "System Events"
-		set frontmost of process "Xcode" to true
-		keystroke "s" using command down
-	end tell
+	my xcode_command("s") -- save
 end save_document
 
 on is_blank_line(_line)
