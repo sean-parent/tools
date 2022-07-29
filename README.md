@@ -49,6 +49,10 @@ In System Preferences, allow Xcode to control you device and send System Events.
 
 ![image](https://user-images.githubusercontent.com/2279724/164563968-7c0c6eeb-91af-41fc-bfe7-5fb86811c4ba.png)
 
+With some security software you may also need to allow Xcode to run software that doesn't meet the system's security policy.
+
+![image](https://user-images.githubusercontent.com/2279724/181844680-9914dc02-9f5f-433f-aed2-7e9fb8ffb9d1.png)
+
 **Note: The script has two hard coded keystrokes in it. One to save the document prior to formatting, and one to paste the formatted changes back into the document. If your command keys are mapped to something other than the US English defaults for these commands, you must modify the script. Find and edit these line:**
 
 ```
