@@ -39,7 +39,7 @@ on xcode_command(key)
 		end try
 	end tell
 	delay 0.5 -- delay so system events don't cross Xcode events
-end xcode_keystroke
+end xcode_command
 
 on paste(_text)
 	-- delay 0.5 -- delay so system events don't cross Xcode events
@@ -101,6 +101,7 @@ on front_source_document()
 	end tell
 end front_source_document
 
+try
 tell application "Xcode"
 	
 	set _document to my front_source_document()
@@ -168,3 +169,7 @@ tell application "Xcode"
 	
 	set selected paragraph range of _document to {_f, _l}
 end tell
+on error message
+			display dialog message
+			error
+end try
