@@ -1,7 +1,7 @@
 #!/usr/bin/osascript
 
 (*
-To use this script, install clang-format (the easiest way is to use Homebrew <https://brew.sh/>)
+To use this script, install clang-tidy (the easiest way is to use Homebrew <https://brew.sh/>)
 
 ```bash
 # install Homebrew
@@ -9,18 +9,19 @@ To use this script, install clang-format (the easiest way is to use Homebrew <ht
     https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 # install clang-format
-brew install clang-format
+brew install llvm
+sudo ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
 ```
 
 Then add the script as a behavior in Xcode:
 
 * Xcode->Behaviors->Edit Behaviors...
 * Click (+) in lower left corner to add new behavior.
-* Name the behavior "clang-format"
-* Click on the (command) icon to add a command key (I use F1)
+* Name the behavior "clang-tidy"
+* Click on the (command) icon to add a command key (I use F2)
 * Click the Run checkbox and the Choose Script... and select this script
 
-Now you can select text in a source document in XCode and hit F1 (or whatever you chose) to format
+Now you can select text in a source document in XCode and hit F2 (or whatever you chose) to format
 that selection. You should make sure the code will compile first or your formatting may be wrong.
 If you don't like the formatting, you can undo.
 
@@ -50,6 +51,11 @@ end paste
 on save_document()
 	my xcode_command("s") -- save
 end save_document
+
+on copy_selection()
+	my xcode_command("c") -- copy
+	return the clipboard as Çclass utf8È
+end copy_selection
 
 on is_blank_line(_line)
 	repeat with _char in _line
@@ -101,9 +107,90 @@ on front_source_document()
 	end tell
 end front_source_document
 
+on findAndReplaceInText(theText, theSearchString, theReplacementString)
+	set AppleScript's text item delimiters to theSearchString
+	set theTextItems to every text item of theText
+	set AppleScript's text item delimiters to theReplacementString
+	set theText to theTextItems as string
+	set AppleScript's text item delimiters to ""
+	return theText
+end findAndReplaceInText
+
+on extractOption(theOption, theText)
+	set AppleScript's text item delimiters to theOption & " "
+	set theTextItems to every text item of the theText
+	set AppleScript's text item delimiters to " "
+	set theRemainder to every text item of (item 2 of theTextItems)
+	return item 1 of theRemainder
+end extractOption
+
+on deleteOptionAndArgument(theOption, theText)
+	set AppleScript's text item delimiters to theOption & " "
+	set theTextItems to every text item of the theText
+	set AppleScript's text item delimiters to " "
+	set theRemainder to every text item of (item 2 of theTextItems)
+	if (count of theRemainder) is 1 then
+		return item 1 of theTextItems
+	else
+		return item 1 of theTextItems & items 2 through end of theRemainder as string
+	end if
+end deleteOptionAndArgument
+
+on deleteDefinedOption(theOption, theText)
+	set AppleScript's text item delimiters to theOption & "\\="
+	set theTextItems to every text item of the theText
+	set AppleScript's text item delimiters to " "
+	set theRemainder to every text item of (item 2 of theTextItems)
+	return item 1 of theTextItems & items 2 through end of theRemainder as string
+end deleteDefinedOption
+
 try
 	tell application "Xcode"
-		
+		set commands to paragraphs 4 through 6 of my copy_selection()
+	end tell
+	-- Extract target file
+	set theTarget to extractOption("-c", item 3 of commands)
+	set tidyCommand to deleteOptionAndArgument("-c", item 3 of commands)
+	
+	-- Apple's module format (or clang version format differes), disable modules
+	set tidyCommand to findAndReplaceInText(tidyCommand, "-fmodules ", "")
+	set tidyCommand to findAndReplaceInText(tidyCommand, "-gmodules ", "")
+	set tidyCommand to findAndReplaceInText(tidyCommand, "-fmodules-validate-once-per-build-session ", "")
+	
+	set tidyCommand to deleteDefinedOption("-fmodules-cache-path", tidyCommand)
+	set tidyCommand to deleteDefinedOption("-fmodules-prune-interval", tidyCommand)
+	set tidyCommand to deleteDefinedOption("-fmodules-prune-after", tidyCommand)
+	
+	-- Apple specific options
+	set tidyCommand to deleteOptionAndArgument("-index-store-path", tidyCommand)
+	set tidyCommand to deleteOptionAndArgument("-index-unit-output-path", tidyCommand)
+	
+	set tidyCommand to my findAndReplaceInText(tidyCommand, "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang", Â
+		"$(/opt/homebrew/bin/brew --prefix llvm)/bin/clang-tidy " & theTarget Â
+		& " --fix --checks=\"-*,google-explicit-constructor\" --") --<<< List of checks go here
+	
+	try
+		tell application "Xcode" to display dialog (do shell script item 1 of commands & ";" & item 2 of commands & ";" & tidyCommand) with title "clang-tidy result"
+	on error error_message
+		display alert "clang-tidy failed" message error_message buttons {"OK"} default button "OK"
+		return
+	end try
+	
+	-- display dialog item 1 of commands & ";" & item 2 of commands & ";" & tidyCommand
+on error message
+	display dialog message
+end try
+
+(*
+		try
+			do shell script item 1 of commands & ";" & item 2 of commands & ";" & item 3 of commands
+		on error error_message
+			display alert "clang-tidy failed" message error_message buttons {"OK"} default button "OK"
+			return
+		end try
+		*)
+
+(*
 		set _document to my front_source_document()
 		
 		if _document is null then
@@ -168,8 +255,4 @@ try
 		set _l to (item 2 of (get selected paragraph range of _document))
 		
 		set selected paragraph range of _document to {_f, _l}
-	end tell
-on error message
-	display dialog message
-	error
-end try
+		*)
