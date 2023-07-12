@@ -42,7 +42,6 @@ on xcode_command(key)
 end xcode_command
 
 on paste(_text)
-	-- delay 0.5 -- delay so system events don't cross Xcode events
 	set the clipboard to _text
 	my xcode_command("v") -- paste
 end paste
@@ -137,17 +136,19 @@ try
 		
 		set _path to path of _document
 		
-		try
-			do shell script "eval \"$(/usr/local/bin/brew shellenv)\";" & Â
-				"clang-format " & Â
-				"-lines=" & item 1 of _range & ":" & item 2 of _range & " " & Â
-				quoted form of _path & " > /tmp/xcode-clang-format.tmp"
-		on error error_message
-			display alert "clang-format failed" message error_message buttons {"OK"} default button "OK"
-			return
-		end try
-		
-		set _result to paragraphs in (read POSIX file "/tmp/xcode-clang-format.tmp" as Çclass utf8È)
+		tell me
+			try
+				do shell script "eval \"$(/usr/local/bin/brew shellenv)\";" & Â
+					"clang-format " & Â
+					"-lines=" & item 1 of _range & ":" & item 2 of _range & " " & Â
+					quoted form of _path & " > /tmp/xcode-clang-format.tmp"
+			on error error_message
+				display alert "clang-format failed" message error_message buttons {"OK"} default button "OK"
+				return
+			end try
+			
+			set _result to paragraphs in (read POSIX file "/tmp/xcode-clang-format.tmp" as Çclass utf8È)
+		end tell
 		
 		set _result_lines to my line_count_without_trailing_empty_lines(_result)
 		
@@ -165,8 +166,8 @@ try
 		
 		my paste(_replace as text)
 		
+		-- Xcode 14.3.1 doesn't set the final range for unknown reasons
 		set _l to (item 2 of (get selected paragraph range of _document))
-		
 		set selected paragraph range of _document to {_f, _l}
 	end tell
 on error message
