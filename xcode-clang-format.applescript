@@ -42,7 +42,6 @@ on xcode_command(key)
 end xcode_command
 
 on paste(_text)
-	-- delay 0.5 -- delay so system events don't cross Xcode events
 	set the clipboard to _text
 	my xcode_command("v") -- paste
 end paste
@@ -79,13 +78,13 @@ end last_blank_line_before
 on line_count_without_trailing_empty_lines(_source)
 	set _lines to (length of _source)
 	if _lines = 0 then return 0
-	
+
 	repeat with _index from _lines to 1 by -1
-		if item _index of _source ­ "" then
+		if item _index of _source ï¿½ "" then
 			return _index
 		end if
 	end repeat
-	
+
 	return 1
 end line_count_without_trailing_empty_lines
 
@@ -103,70 +102,72 @@ end front_source_document
 
 try
 	tell application "Xcode"
-		
+
 		set _document to my front_source_document()
-		
+
 		if _document is null then
-			display alert "clang-format failed." message Â
+			display alert "clang-format failed." message ï¿½
 				"Could not find front document." buttons {"OK"} default button "OK"
 			return
 		end if
-		
+
 		if selected paragraph range of _document is {} then
-			display alert "clang-format failed." message Â
+			display alert "clang-format failed." message ï¿½
 				"No selection found in front document." buttons {"OK"} default button "OK"
 			return
 		end if
-		
+
 		my save_document()
-		
+
 		set _source to paragraphs of (get text of _document)
-		
+
 		set _range to selected paragraph range of _document
-		
+
 		set item 1 of _range to my last_blank_line_before(_source, item 1 of _range)
 		set item 2 of _range to my last_blank_line_after(_source, item 2 of _range)
-		
+
 		-- pin range to ignore empty blank lines
-		
+
 		set _source_lines to my line_count_without_trailing_empty_lines(_source)
 		if item 1 of _range > _source_lines then return -- selection in trailing white space is ambigous
 		if item 2 of _range > _source_lines then set item 2 of _range to _source_lines
-		
+
 		set selected paragraph range of _document to _range
-		
+
 		set _path to path of _document
-		
-		try
-			do shell script "eval \"$(/opt/homebrew/bin/brew shellenv)\";" & Â
-				"clang-format " & Â
-				"-lines=" & item 1 of _range & ":" & item 2 of _range & " " & Â
-				quoted form of _path & " > /tmp/xcode-clang-format.tmp"
-		on error error_message
-			display alert "clang-format failed" message error_message buttons {"OK"} default button "OK"
-			return
-		end try
-		
-		set _result to paragraphs in (read POSIX file "/tmp/xcode-clang-format.tmp" as Çclass utf8È)
-		
+
+		tell me
+			try
+				do shell script "eval \"$(/opt/homebrew/bin/brew shellenv)\";" & ï¿½
+					"clang-format " & ï¿½
+					"-lines=" & item 1 of _range & ":" & item 2 of _range & " " & ï¿½
+					quoted form of _path & " > /tmp/xcode-clang-format.tmp"
+			on error error_message
+				display alert "clang-format failed" message error_message buttons {"OK"} default button "OK"
+				return
+			end try
+
+			set _result to paragraphs in (read POSIX file "/tmp/xcode-clang-format.tmp" as ï¿½class utf8ï¿½)
+		end tell
+
 		set _result_lines to my line_count_without_trailing_empty_lines(_result)
-		
+
 		set _f to item 1 of _range
 		set _l to (item 2 of _range) + (_result_lines - _source_lines)
 		if _l > length of _result then set _l to length of _result
 		if _f > _l then return -- selection was in trailing blank lines
-		
+
 		set _replace to item _f of _result
-		if _f ­ _l then
+		if _f ï¿½ _l then
 			repeat with _line in items (_f + 1) thru _l of _result
 				set _replace to _replace & linefeed & _line
 			end repeat
 		end if
-		
+
 		my paste(_replace as text)
-		
+
+		-- Xcode 14.3.1 doesn't set the final range for unknown reasons
 		set _l to (item 2 of (get selected paragraph range of _document))
-		
 		set selected paragraph range of _document to {_f, _l}
 	end tell
 on error message
