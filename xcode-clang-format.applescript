@@ -138,7 +138,7 @@ try
 		set _path to path of _document
 		
 		try
-			do shell script "eval \"$(/usr/local/bin/brew shellenv)\";" & Â
+			do shell script "eval \"$(/opt/homebrew/bin/brew shellenv)\";" & Â
 				"clang-format " & Â
 				"-lines=" & item 1 of _range & ":" & item 2 of _range & " " & Â
 				quoted form of _path & " > /tmp/xcode-clang-format.tmp"
