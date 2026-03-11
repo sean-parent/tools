@@ -1,0 +1,3 @@
+#!zsh
+
+git clang-format
